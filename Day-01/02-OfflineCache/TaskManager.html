@@ -9,9 +9,16 @@
 	<script src="taskStorage-ajax.js"></script> <!-- Offline alternative is taskStorage-ls.js -->
 	
 	<script src="TaskManager.js"></script>
+	<script>
+	applicationCache.addEventListener("updateready", function(){
+		var result = confirm("A new version of the application is available in the cache.  Do you want to use it?")
+		if (result)
+			window.location.reload();
+	});
+	</script>
 </head>
 <body>
-	<h1>Task Manager</h1>
+	<h1>Task Manager - Ver 3.0</h1>
 	<labe>Task :</labe>
 	<input type="text" name="" id="txtTask">
 	<input type="button" value="Add Task" id="btnAddTask">
