@@ -18,42 +18,89 @@
 	</style>
 	<script>
 	window.addEventListener("DOMContentLoaded", init);
-	var storage = window.localStorage;
+	var taskStorage = (function(){
+		var storage = window.localStorage;
+		function getAllTasks(){
+			var result = [];
+			for(var i=0;i<storage.length;i++){
+				var taskId = storage.key(i);
+				var taskAsString = storage.getItem(taskId);
+				var task = window.JSON.parse(taskAsString);
+				result.push(task);
+			}
+			return result;
+		}
+
+		function addTask(taskName){
+			var newTaskId = new Date().getTime().toString();
+			var newTask = {
+				id : newTaskId,
+				name : taskName,
+				isCompleted : false
+			};
+
+			storage.setItem(newTaskId, window.JSON.stringify(newTask));
+			return newTask;
+		}
+
+		function removeTask(taskId){
+			storage.removeItem(taskId);
+		}
+
+		function toggleTask(taskId){
+			var taskAsString = storage.getItem(taskId);
+			var task = window.JSON.parse(taskAsString);
+			task.isCompleted = !task.isCompleted;
+			storage.setItem(task.id, JSON.stringify(task));
+		}
+
+		return {
+			getAll : getAllTasks,
+			add : addTask,
+			remove : removeTask,
+			toggle: toggleTask
+		};
+
+	})();
+	
+
 	function init(){
 		document.getElementById("btnAddTask").addEventListener("click", onBtnAddTaskClick);
 		document.getElementById("btnRemoveCompleted").addEventListener("click", onBtnRemoveCompletedClick);
-
-		for(var i=0;i<storage.length;i++){
-			var taskId = storage.key(i);
-			var taskName = storage.getItem(taskId);
-			addTaskToList(taskId, taskName);
+		var allTasks = taskStorage.getAll();
+		for(var i=0;i<allTasks.length;i++){
+			addTaskToList(allTasks[i]);
 		}
 	}
 	function onBtnAddTaskClick(){
 		var taskName = document.getElementById("txtTask").value;
-
-		var newTaskId = new Date().getTime().toString();
-		storage.setItem(newTaskId, taskName);
-		addTaskToList(newTaskId, taskName);
+		var newTask = taskStorage.add(taskName);
+		addTaskToList(newTask);
 		
 	}
-	function addTaskToList(taskId, taskName){
+	function addTaskToList(task){
 		var newTask = document.createElement("li");
-		newTask.innerHTML = taskName;
-		newTask.setAttribute("task-id", taskId);
+		newTask.innerHTML = task.name;
+		newTask.setAttribute("task-id", task.id);
+		if (task.isCompleted)
+			newTask.classList.add("completed");
 		newTask.addEventListener("click", onTaskItemClick);
 		document.getElementById("olTaskList").appendChild(newTask);
 	}
+
 	function onTaskItemClick(){
 		this.classList.toggle("completed");
+		var taskId = this.getAttribute("task-id");
+		taskStorage.toggle(taskId);
 	}
+
 	function onBtnRemoveCompletedClick(){
 		var taskItems = document.getElementById("olTaskList").children;
 		for(var i=taskItems.length-1;i>=0;i--){
 			var taskItem = taskItems[i];
 			if (taskItem.classList.contains("completed")){
 				var taskId = taskItem.getAttribute("task-id");
-				storage.removeItem(taskId);
+				taskStorage.remove(taskId);
 				taskItem.remove();
 			}
 		}
