@@ -1,0 +1,67 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<title>File API</title> 
+<style>
+#formbox{ 
+float: left; 
+padding: 20px; 
+border: 1px solid #999999; 
+} 
+#databox{ 
+float: left; 
+width: 500px; 
+margin-left: 20px; 
+padding: 20px; 
+border: 1px solid #999999; 
+} 
+.directory{ 
+color: #0000FF; 
+font-weight: bold; 
+cursor: pointer; 
+}
+</style> 
+<!-- File properties = name, size, type -->
+<script>
+function initiate(){ 
+databox=document.getElementById('databox'); 
+var myfiles=document.getElementById('myfiles'); 
+myfiles.addEventListener('change', process, false); 
+} 
+function process(e){ 
+var files=e.target.files; 
+var file=files[0]; 
+var reader=new FileReader(); 
+reader.onloadstart=start; 
+reader.onprogress=status; 
+reader.onloadend=function(){ show(file); }; 
+	console.log(reader.readAsText(file)); 
+} 
+function start(e){ 
+databox.innerHTML='<progress value="0" max="100">0%</progress>'; 
+} 
+function status(e){ 
+var per=parseInt(e.loaded/e.total*100); 
+databox.innerHTML='<progress value="'+per+'" max="100">'+per+'%</progress>'; 
+} 
+function show(file){ 
+databox.innerHTML='Name: '+file.name+'<br>'; 
+databox.innerHTML+='Type: '+file.type+'<br>'; 
+databox.innerHTML+='Size: '+file.size+' bytes<br>';
+} 
+window.addEventListener('load', initiate, false); 
+</script> 
+</head> 
+<body> 
+<section id="formbox"> 
+<form name="form"> 
+<p>File:<br><input type="file" name="myfiles" id="myfiles"></p> 
+</form> 
+</section> 
+<section id="databox"> 
+No File Selected 
+</section> 
+</body> 
+</html> 
+
+  
